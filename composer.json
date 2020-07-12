@@ -1,0 +1,33 @@
+{
+  "name": "mucts/laravel-amqp",
+  "description": "AMQPMessage SDK for Laravel 7",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "herry",
+      "email": "yuandeng@aliyun.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MuCTS\\Laravel\\AMQP\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MuCTS\\Laravel\\AMQP\\Providers\\ServiceProvider"
+      ],
+      "aliases": {
+        "AMQP": "MuCTS\\Laravel\\AMQP\\Facades\\AMQP"
+      }
+    }
+  },
+  "require": {
+    "php": "^7.4",
+    "ext-json": "^7.4",
+    "php-amqplib/php-amqplib": "^2.11",
+    "laravel/framework": "^7.19"
+  }
+}
