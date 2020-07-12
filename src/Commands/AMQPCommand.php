@@ -13,8 +13,11 @@
 namespace MuCTS\Laravel\AMQP\Commands;
 
 
+use ErrorException;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use MuCTS\Laravel\AMQP\Facades\AMQP;
 use MuCTS\Laravel\AMQP\Message;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
@@ -41,7 +44,7 @@ abstract class AMQPCommand extends Command
                     /** @var Message $message */
                     return static::processMessage($message);
                 });
-        } catch (\Exception $exception) {
+        } catch (InvalidArgumentException|ErrorException|Exception $exception) {
             Log::error('AMQPMessage consume error:' . $exception->getMessage());
         }
     }

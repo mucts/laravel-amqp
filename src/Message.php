@@ -47,6 +47,15 @@ class Message
     }
 
     /**
+     * Get AMQPMessage
+     *
+     * @return AMQPMessage
+     */
+    public function getMessage(){
+        return $this->message;
+    }
+
+    /**
      * Dynamically pass methods to the message.
      *
      * @param string $method

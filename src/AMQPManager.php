@@ -329,7 +329,7 @@ class AMQPManager
     /**
      * Amqp Message Publisher
      *
-     * @param $message
+     * @param string|array|object|Collection|AMQPMessage|Message $message
      * @throws Exception
      */
     public function publish($message)
@@ -361,6 +361,7 @@ class AMQPManager
 
         $channel->queue_bind($this->getQueue(), $this->getExchange());
 
+        if ($message instanceof Message) $message->getMessage();
         if (!$message instanceof AMQPMessage) {
             if (is_array($message) || is_object($message)) $message = json_encode($message);
             elseif ($message instanceof Collection) $message = $message->toJson();
