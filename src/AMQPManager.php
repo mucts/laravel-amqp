@@ -40,13 +40,58 @@ class AMQPManager
     private $app;
 
     /**
+     * AMQPMessage Connection Name
+     *
      * @var string|null
      */
     private ?string $connectionName = null;
+
+    /**
+     * AMQPQueue Name
+     * 队列名
+     *
+     * @var string
+     */
     private string $queue = '';
+
+    /**
+     * AMQPExchange Name
+     * 交换机
+     *
+     * @var string
+     */
     private string $exchange = '';
+
+    /**
+     * AMQPExchange Type
+     * 交换机类型
+     *
+     * @var string
+     */
     private string $exchangeType = '';
+
+    /**
+     * Consumer identifier
+     * 用户标签
+     *
+     * @var string
+     */
     private string $consumerTag = '';
+
+    /**
+     * AMQPMessage Route Key
+     * 路由键
+     *
+     * @var string
+     */
+    private string $routeKey = '';
+
+    /**
+     * Auto Ack
+     * 自动消费
+     *
+     * @var bool
+     */
     private bool $autoAck = false;
 
     /**
@@ -105,7 +150,7 @@ class AMQPManager
      * @return AMQPStreamConnection
      * @throws Exception
      */
-    public function makeConnection(string $name)
+    protected function makeConnection(string $name)
     {
         $config = $this->configuration($name);
         if (isset($config['host'])) $config = [$config];
@@ -118,7 +163,7 @@ class AMQPManager
      * @return mixed|AMQPStreamConnection
      * @throws Exception
      */
-    public function getConnection()
+    protected function getConnection()
     {
         $name = $this->connectionName ?: $this->getDefaultConnection();
         return $this->makeConnection($name);
@@ -200,6 +245,28 @@ class AMQPManager
     }
 
     /**
+     * Set Route Key
+     *
+     * @param string $routeKey
+     * @return $this
+     */
+    public function setRouteKey(string $routeKey)
+    {
+        $this->routeKey = $routeKey;
+        return $this;
+    }
+
+    /**
+     * Get Route Key
+     *
+     * @return string
+     */
+    public function getRouteKey(): string
+    {
+        return $this->routeKey;
+    }
+
+    /**
      * Set Consumer identifier
      *
      * @param string $consumerTag
@@ -218,9 +285,9 @@ class AMQPManager
      */
     public function getConsumerTag(): string
     {
-        if (empty($this->consumerTag)) {
+        /*if (empty($this->consumerTag)) {
             throw new InvalidArgumentException("'consumer tag' key is required.");
-        }
+        }*/
         return $this->consumerTag;
     }
 
@@ -279,7 +346,8 @@ class AMQPManager
          * auto_delete: false the exchange won't be deleted once the channel is closed.
          */
         $channel->exchange_declare($this->getExchange(), $this->getExchangeTyp(), false, true, false);
-        $channel->queue_bind($this->getQueue(), $this->getExchange());
+
+        $channel->queue_bind($this->getQueue(), $this->getExchange(), $this->getRouteKey());
 
         /**
          *  queue: Queue from where to get the messages
@@ -368,7 +436,7 @@ class AMQPManager
             $message = new AMQPMessage($message, ['content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
         }
 
-        $channel->basic_publish($message, $this->getExchange());
+        $channel->basic_publish($message, $this->getExchange(), $this->getRouteKey());
 
         $channel->close();
         $connection->close();

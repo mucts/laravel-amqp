@@ -18,7 +18,14 @@ use MuCTS\Laravel\AMQP\AMQPManager;
 
 /**
  * Class AMQP
+ *
  * @mixin AMQPManager
+ * @method static AMQPManager connection(?string $name = null)
+ * @method static AMQPManager setQueue(string $queue)
+ * @method static AMQPManager setExchange(string $exchange)
+ * @method static AMQPManager setExchangeType(string $exchangeType)
+ * @method static AMQPManager setConsumerTag(string $consumerTag)
+ * @method static AMQPManager setAutoAck(bool $autoAsk)
  * @package MuCTS\Laravel\AMQP\Facades
  */
 class AMQP extends Facade

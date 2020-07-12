@@ -24,11 +24,49 @@ use PhpAmqpLib\Exchange\AMQPExchangeType;
 
 abstract class AMQPCommand extends Command
 {
+    /**
+     * AMQPMessage Connection Name
+     *
+     * @var string|null
+     */
     protected ?string $connectionName = null;
+
+    /**
+     * AMQPExchange Name
+     * @var string
+     */
     protected string $exchange = '';
+
+    /**
+     * AMQPExchange Type
+     * @var string
+     */
     protected string $exchangeType = AMQPExchangeType::TOPIC;
+
+    /**
+     * AMQPQueue Name
+     * @var string
+     */
     protected string $queue = '';
+
+    /**
+     * Consumer identifier
+     * @var string
+     */
     protected string $consumerTag = '';
+
+    /**
+     * AMQPMessage Route Key
+     * 路由键
+     *
+     * @var string
+     */
+    private string $routeKey = '';
+
+    /**
+     * Auto Ack
+     * @var bool
+     */
     protected bool $autoAsk = false;
 
     public function handle()
@@ -40,6 +78,7 @@ abstract class AMQPCommand extends Command
                 ->setQueue($this->queue)
                 ->setConsumerTag($this->consumerTag)
                 ->setAutoAck($this->autoAsk)
+                ->setRouteKey($this->routeKey)
                 ->consume(function ($message) {
                     /** @var Message $message */
                     return static::processMessage($message);
@@ -49,5 +88,11 @@ abstract class AMQPCommand extends Command
         }
     }
 
+    /**
+     * Process Message
+     *
+     * @param Message $message
+     * @return mixed
+     */
     abstract protected function processMessage(Message $message);
 }
