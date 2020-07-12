@@ -61,7 +61,7 @@ abstract class AMQPCommand extends Command
      *
      * @var string
      */
-    private string $routeKey = '';
+    protected string $routeKey = '';
 
     /**
      * Auto Ack
