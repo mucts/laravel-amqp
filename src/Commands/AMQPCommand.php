@@ -49,5 +49,5 @@ abstract class AMQPCommand extends Command
         }
     }
 
-    abstract function processMessage(Message $message);
+    abstract protected function processMessage(Message $message);
 }

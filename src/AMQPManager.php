@@ -363,12 +363,12 @@ class AMQPManager
 
         if ($message instanceof Message) $message->getMessage();
         if (!$message instanceof AMQPMessage) {
-            if (is_array($message) || is_object($message)) $message = json_encode($message);
-            elseif ($message instanceof Collection) $message = $message->toJson();
+            if ($message instanceof Collection) $message = $message->toJson();
+            elseif (is_array($message) || is_object($message)) $message = json_encode($message);
             $message = new AMQPMessage($message, ['content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT]);
         }
 
-        $channel->basic_publish($message, $message);
+        $channel->basic_publish($message, $this->getExchange());
 
         $channel->close();
         $connection->close();
