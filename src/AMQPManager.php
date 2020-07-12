@@ -427,7 +427,7 @@ class AMQPManager
          * */
         $channel->exchange_declare($this->getExchange(), $this->getExchangeTyp(), false, true, false);
 
-        $channel->queue_bind($this->getQueue(), $this->getExchange());
+        $channel->queue_bind($this->getQueue(), $this->getExchange(), $this->getRouteKey());
 
         if ($message instanceof Message) $message->getMessage();
         if (!$message instanceof AMQPMessage) {
