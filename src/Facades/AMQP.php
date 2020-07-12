@@ -26,6 +26,7 @@ use MuCTS\Laravel\AMQP\AMQPManager;
  * @method static AMQPManager setExchangeType(string $exchangeType)
  * @method static AMQPManager setConsumerTag(string $consumerTag)
  * @method static AMQPManager setAutoAck(bool $autoAsk)
+ * @method static AMQPManager setRouteKey(string $routeKey)
  * @package MuCTS\Laravel\AMQP\Facades
  */
 class AMQP extends Facade
