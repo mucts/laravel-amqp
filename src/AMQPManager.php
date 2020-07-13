@@ -44,7 +44,7 @@ class AMQPManager
      *
      * @var string|null
      */
-    private ?string $connectionName = null;
+    private ?string $connection = null;
 
     /**
      * AMQPQueue Name
@@ -122,7 +122,7 @@ class AMQPManager
      */
     public function connection(?string $name = null)
     {
-        $this->connectionName = $name ?: $this->getDefaultConnection();
+        $this->connection = $name ?: $this->getDefaultConnection();
         return $this;
     }
 
@@ -165,7 +165,7 @@ class AMQPManager
      */
     protected function getConnection()
     {
-        $name = $this->connectionName ?: $this->getDefaultConnection();
+        $name = $this->connection ?: $this->getDefaultConnection();
         return $this->makeConnection($name);
     }
 

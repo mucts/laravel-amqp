@@ -29,7 +29,7 @@ abstract class AMQPCommand extends Command
      *
      * @var string|null
      */
-    protected ?string $connectionName = null;
+    protected ?string $connection = null;
 
     /**
      * AMQPExchange Name
@@ -72,7 +72,7 @@ abstract class AMQPCommand extends Command
     public function handle()
     {
         try {
-            AMQP::connection($this->connectionName)
+            AMQP::connection($this->connection)
                 ->setExchange($this->exchange)
                 ->setExchangeType($this->exchangeType)
                 ->setQueue($this->queue)
