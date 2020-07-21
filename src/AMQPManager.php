@@ -170,6 +170,44 @@ class AMQPManager
     }
 
     /**
+     * Start Connection
+     *
+     * @return array
+     * @throws Exception
+     */
+    protected function startConnection()
+    {
+        $connection = $this->getConnection();
+        $channel = $connection->channel();
+
+        /**
+         * The following code is the same both in the consumer and the producer.
+         * In this way we are sure we always have a queue to consume from and an
+         * exchange where to publish messages.
+         *
+         * name: $queue
+         * passive: false
+         * durable: true the queue will survive server restarts
+         * exclusive: false the queue can be accessed in other channels
+         * auto_delete: false the queue won't be deleted once the channel is closed.
+         */
+        $channel->queue_declare($this->getQueue(), false, true, false, false);
+
+        /**
+         * name: $exchange
+         * type: direct
+         * passive: false
+         * durable: true the exchange will survive server restarts
+         * auto_delete: false the exchange won't be deleted once the channel is closed.
+         */
+        $channel->exchange_declare($this->getExchange(), $this->getExchangeTyp(), false, true, false);
+
+        $channel->queue_bind($this->getQueue(), $this->getExchange(), $this->getRouteKey());
+
+        return [$connection, $channel];
+    }
+
+    /**
      * set queue name
      *
      * @param string $queue
@@ -285,9 +323,6 @@ class AMQPManager
      */
     public function getConsumerTag(): string
     {
-        /*if (empty($this->consumerTag)) {
-            throw new InvalidArgumentException("'consumer tag' key is required.");
-        }*/
         return $this->consumerTag;
     }
 
@@ -322,32 +357,9 @@ class AMQPManager
      */
     public function consume(callable $processMessage)
     {
-        $connection = $this->getConnection();
-        $channel = $connection->channel();
-
-        /**
-         * The following code is the same both in the consumer and the producer.
-         * In this way we are sure we always have a queue to consume from and an
-         * exchange where to publish messages.
-         *
-         * name: $queue
-         * passive: false
-         * durable: true the queue will survive server restarts
-         * exclusive: false the queue can be accessed in other channels
-         * auto_delete: false the queue won't be deleted once the channel is closed.
-         */
-        $channel->queue_declare($this->getQueue(), false, true, false, false);
-
-        /**
-         * name: $exchange
-         * type: direct
-         * passive: false
-         * durable: true the exchange will survive server restarts
-         * auto_delete: false the exchange won't be deleted once the channel is closed.
-         */
-        $channel->exchange_declare($this->getExchange(), $this->getExchangeTyp(), false, true, false);
-
-        $channel->queue_bind($this->getQueue(), $this->getExchange(), $this->getRouteKey());
+        /** @var AMQPStreamConnection $connection */
+        /** @var AMQPChannel $channel */
+        list($connection, $channel) = $this->startConnection();
 
         /**
          *  queue: Queue from where to get the messages
@@ -402,32 +414,9 @@ class AMQPManager
      */
     public function publish($message)
     {
-        $connection = $this->getConnection();
-        $channel = $connection->channel();
-
-        /**
-         * The following code is the same both in the consumer and the producer.
-         * In this way we are sure we always have a queue to consume from and an
-         * exchange where to publish messages.
-         *
-         * name: $queue
-         * passive: false
-         * durable: true the queue will survive server restarts
-         * exclusive: false the queue can be accessed in other channels
-         * auto_delete: false the queue won't be deleted once the channel is closed.
-         */
-        $channel->queue_declare($this->getQueue(), false, true, false, false);
-
-        /**
-         * name: $exchange
-         * type: direct
-         * passive: false
-         * durable: true the exchange will survive server restarts
-         * auto_delete: false the exchange won't be deleted once the channel is closed.
-         * */
-        $channel->exchange_declare($this->getExchange(), $this->getExchangeTyp(), false, true, false);
-
-        $channel->queue_bind($this->getQueue(), $this->getExchange(), $this->getRouteKey());
+        /** @var AMQPStreamConnection $connection */
+        /** @var AMQPChannel $channel */
+        list($connection, $channel) = $this->startConnection();
 
         if ($message instanceof Message) $message->getMessage();
         if (!$message instanceof AMQPMessage) {
