@@ -31,11 +31,19 @@ class Message
     }
 
     /**
-     * Send a message ack the consumer.
+     * Acknowledges one or more messages
      */
     public function ack()
     {
         $this->message->delivery_info['channel']->basic_ack($this->message->delivery_info['delivery_tag']);
+    }
+
+    /**
+     *  Rejects one or several received messages
+     */
+    public function nack()
+    {
+        $this->message->delivery_info['channel']->basic_nack($this->message->delivery_info['delivery_tag']);
     }
 
     /**
