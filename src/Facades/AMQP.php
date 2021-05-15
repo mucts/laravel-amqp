@@ -31,7 +31,7 @@ use MuCTS\Laravel\AMQP\AMQPManager;
  */
 class AMQP extends Facade
 {
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return AMQPManager::class;
     }

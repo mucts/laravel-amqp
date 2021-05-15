@@ -37,14 +37,14 @@ class AMQPManager
     /**
      * @var Application|Container
      */
-    private $app;
+    private Application|Container $app;
 
     /**
      * AMQPMessage Connection Name
      *
      * @var string|null
      */
-    private ?string $connection = null;
+    protected ?string $connection = null;
 
     /**
      * AMQPQueue Name
@@ -52,7 +52,7 @@ class AMQPManager
      *
      * @var string
      */
-    private string $queue = '';
+    protected string $queue = '';
 
     /**
      * AMQPExchange Name
@@ -60,7 +60,7 @@ class AMQPManager
      *
      * @var string
      */
-    private string $exchange = '';
+    protected string $exchange = '';
 
     /**
      * AMQPExchange Type
@@ -68,7 +68,7 @@ class AMQPManager
      *
      * @var string
      */
-    private string $exchangeType = '';
+    protected string $exchangeType = '';
 
     /**
      * Consumer identifier
@@ -76,7 +76,7 @@ class AMQPManager
      *
      * @var string
      */
-    private string $consumerTag = '';
+    protected string $consumerTag = '';
 
     /**
      * AMQPMessage Route Key
@@ -84,7 +84,14 @@ class AMQPManager
      *
      * @var string
      */
-    private string $routeKey = '';
+    protected string $routeKey = '';
+
+    /**
+     * AMQPMessage vhost
+     *
+     * @var string|null
+     */
+    protected ?string $vhost = null;
 
     /**
      * Auto Ack
@@ -92,13 +99,13 @@ class AMQPManager
      *
      * @var bool
      */
-    private bool $autoAck = false;
+    protected bool $autoAck = false;
 
     /**
      * RabbitMQ constructor.
      * @param Application|Container $app
      */
-    public function __construct($app)
+    public function __construct(Container|Application $app)
     {
         $this->app = $app;
     }
@@ -106,9 +113,9 @@ class AMQPManager
     /**
      * Get default connection
      *
-     * @return mixed
+     * @return string
      */
-    public function getDefaultConnection()
+    public function getDefaultConnection(): string
     {
         return $this->app['config']['amqp.default'];
     }
@@ -120,7 +127,7 @@ class AMQPManager
      * @return $this
      * @throws Exception
      */
-    public function connection(?string $name = null)
+    public function connection(?string $name = null): static
     {
         $this->connection = $name ?: $this->getDefaultConnection();
         return $this;
@@ -135,7 +142,7 @@ class AMQPManager
      */
     protected function configuration(string $name): array
     {
-        $name = $name ?: $this->getDefaultConnection();
+        $name        = $name ?: $this->getDefaultConnection();
         $connections = $this->app['config']['amqp.connections'];
         if (is_null($config = Arr::get($connections, $name))) {
             throw new InvalidArgumentException("RabbitMQ connection [{$name}] not configured.");
@@ -150,20 +157,25 @@ class AMQPManager
      * @return AMQPStreamConnection
      * @throws Exception
      */
-    protected function makeConnection(string $name)
+    protected function makeConnection(string $name): AMQPStreamConnection
     {
         $config = $this->configuration($name);
         if (isset($config['host'])) $config = [$config];
+        if ($this->getVhost()) {
+            foreach ($config as &$conf) {
+                $conf['vhost'] = $this->getVhost();
+            }
+        }
         return AMQPStreamConnection::create_connection($config);
     }
 
     /**
      * Get Connection
      *
-     * @return mixed|AMQPStreamConnection
+     * @return AMQPStreamConnection
      * @throws Exception
      */
-    protected function getConnection()
+    protected function getConnection(): AMQPStreamConnection
     {
         $name = $this->connection ?: $this->getDefaultConnection();
         return $this->makeConnection($name);
@@ -175,10 +187,10 @@ class AMQPManager
      * @return array
      * @throws Exception
      */
-    protected function startConnection()
+    protected function startConnection(): array
     {
         $connection = $this->getConnection();
-        $channel = $connection->channel();
+        $channel    = $connection->channel();
 
         /**
          * The following code is the same both in the consumer and the producer.
@@ -213,7 +225,7 @@ class AMQPManager
      * @param string $queue
      * @return $this
      */
-    public function setQueue(string $queue)
+    public function setQueue(string $queue): static
     {
         $this->queue = $queue;
         return $this;
@@ -238,7 +250,7 @@ class AMQPManager
      * @param string $exchange
      * @return $this
      */
-    public function setExchange(string $exchange)
+    public function setExchange(string $exchange): static
     {
         $this->exchange = $exchange;
         return $this;
@@ -263,7 +275,7 @@ class AMQPManager
      * @param string $exchangeType
      * @return $this
      */
-    public function setExchangeType(string $exchangeType)
+    public function setExchangeType(string $exchangeType): static
     {
         $this->exchangeType = $exchangeType;
         return $this;
@@ -288,7 +300,7 @@ class AMQPManager
      * @param string $routeKey
      * @return $this
      */
-    public function setRouteKey(string $routeKey)
+    public function setRouteKey(string $routeKey): static
     {
         $this->routeKey = $routeKey;
         return $this;
@@ -310,7 +322,7 @@ class AMQPManager
      * @param string $consumerTag
      * @return AMQPManager
      */
-    public function setConsumerTag(string $consumerTag)
+    public function setConsumerTag(string $consumerTag): static
     {
         $this->consumerTag = $consumerTag;
         return $this;
@@ -332,7 +344,7 @@ class AMQPManager
      * @param bool $autoAsk
      * @return $this
      */
-    public function setAutoAck(bool $autoAsk)
+    public function setAutoAck(bool $autoAsk): static
     {
         $this->autoAck = $autoAsk;
         return $this;
@@ -346,6 +358,28 @@ class AMQPManager
     public function getAutoAck(): bool
     {
         return $this->autoAck;
+    }
+
+    /**
+     * Set vhost
+     *
+     * @param string|null $vhost
+     * @return $this
+     */
+    public function setVhost(?string $vhost): static
+    {
+        $this->vhost = $vhost;
+        return $this;
+    }
+
+    /**
+     * Get vhost
+     *
+     * @return string|null
+     */
+    public function getVhost(): ?string
+    {
+        return $this->vhost;
     }
 
     /**
@@ -375,9 +409,7 @@ class AMQPManager
             false, $this->getAutoAck(),
             false,
             false,
-            function ($message) use ($processMessage) {
-                /** @var AMQPMessage $message */
-                $message = new Message($message);
+            function (AMQPMessage $message) use ($processMessage) {
                 return $processMessage($message);
             });
 
@@ -394,13 +426,14 @@ class AMQPManager
      *
      * @return Closure
      */
-    public function shutdown()
+    public function shutdown(): Closure
     {
         /**
          * @param AMQPChannel $channel
          * @param AbstractConnection $connection
+         * @throws Exception
          */
-        return function ($channel, $connection) {
+        return function (AMQPChannel $channel, AbstractConnection $connection) {
             $channel->close();
             $connection->close();
         };
@@ -409,16 +442,15 @@ class AMQPManager
     /**
      * Amqp Message Publisher
      *
-     * @param string|array|object|Collection|AMQPMessage|Message $message
+     * @param array|string|AMQPMessage|Collection $message
      * @throws Exception
      */
-    public function publish($message)
+    public function publish(array|string|Collection|AMQPMessage $message)
     {
         /** @var AMQPStreamConnection $connection */
         /** @var AMQPChannel $channel */
         list($connection, $channel) = $this->startConnection();
 
-        if ($message instanceof Message) $message->getMessage();
         if (!$message instanceof AMQPMessage) {
             if ($message instanceof Collection) $message = $message->toJson();
             elseif (is_array($message) || is_object($message)) $message = json_encode($message);
@@ -440,7 +472,7 @@ class AMQPManager
      * @return mixed
      * @throws Exception
      */
-    public function __call($method, $parameters)
+    public function __call(string $method, array $parameters)
     {
         return $this->getConnection()->{$method}(...$parameters);
     }

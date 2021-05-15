@@ -1,6 +1,6 @@
 {
   "name": "mucts/laravel-amqp",
-  "description": "AMQPMessage SDK for Laravel 7",
+  "description": "AMQPMessage SDK for Laravel 8",
   "type": "library",
   "license": "MIT",
   "authors": [
@@ -25,9 +25,11 @@
     }
   },
   "require": {
-    "php": "^7.4",
-    "ext-json": "^7.4",
-    "php-amqplib/php-amqplib": "^2.11",
-    "laravel/framework": "^7.19"
+    "php": "^8.0",
+    "ext-json": "^8.0",
+    "ext-sockets": "^8.0",
+    "ext-mbstring": "^8.0",
+    "php-amqplib/php-amqplib": "^3.0",
+    "laravel/framework": "^8.41"
   }
 }

@@ -19,8 +19,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use MuCTS\Laravel\AMQP\Facades\AMQP;
-use MuCTS\Laravel\AMQP\Message;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
+use PhpAmqpLib\Message\AMQPMessage;
 
 abstract class AMQPCommand extends Command
 {
@@ -64,6 +64,13 @@ abstract class AMQPCommand extends Command
     protected string $routeKey = '';
 
     /**
+     * AMQPMessage Vhost
+     *
+     * @var string|null
+     */
+    protected ?string $vhost = null;
+
+    /**
      * Auto Ack
      * @var bool
      */
@@ -79,11 +86,11 @@ abstract class AMQPCommand extends Command
                 ->setConsumerTag($this->consumerTag)
                 ->setAutoAck($this->autoAsk)
                 ->setRouteKey($this->routeKey)
-                ->consume(function ($message) {
-                    /** @var Message $message */
+                ->setVhost($this->vhost)
+                ->consume(function (AMQPMessage $message) {
                     return static::processMessage($message);
                 });
-        } catch (InvalidArgumentException|ErrorException|Exception $exception) {
+        } catch (InvalidArgumentException | ErrorException | Exception $exception) {
             Log::error('AMQPMessage consume error:' . $exception->getMessage());
         }
     }
@@ -91,8 +98,8 @@ abstract class AMQPCommand extends Command
     /**
      * Process Message
      *
-     * @param Message $message
+     * @param AMQPMessage $message
      * @return mixed
      */
-    abstract protected function processMessage(Message $message);
+    abstract protected function processMessage(AMQPMessage $message);
 }

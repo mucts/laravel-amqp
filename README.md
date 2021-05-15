@@ -9,7 +9,7 @@
 </p>
 
 # Laravel AMQP
-> AMQPMessage SDK for Laravel 7
+> AMQPMessage SDK for Laravel 8
 
 ## Installation
 
@@ -49,7 +49,7 @@ AMQP::connection('default')
 - AMQPMessage consumer
 ```php
 use MuCTS\Laravel\AMQP\Commands\AMQPCommand;
-use MuCTS\Laravel\AMQP\Message;
+use PhpAmqpLib\Message\AMQPMessage;
 use Illuminate\Support\Facades\Log;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 
@@ -61,19 +61,19 @@ class test extends AMQPCommand{
     protected ?string $connectionName = 'default';
     protected bool $autoAsk = false;
 
-    protected function processMessage(Message $message){
+    protected function processMessage(AMQPMessage $message){
         Log::info($message->getBody());
         // message ask
         $message->ack();
-        // message cancel
-        $message->cancel();
+        // message nack
+        $message->nack(true);
     }
 }
 ```
 
 
 ## Configuration
-If `config/snowflake.php` not exist, run below:
+If `config/amqp.php` not exist, run below:
 ```
 php artisan vendor:publish
 ```
