@@ -16,12 +16,12 @@
 ### Server Requirements
 >you will need to make sure your server meets the following requirements:
 
-- `php ^7.4`
+- `php ^8.0`
 - `JSON PHP Extension`
 - `Sockets PHP Extension`
 - `MBString PHP Extension`
-- `php-amqplib/php-amqplib ^2.11`
-- `laravel/framework ^7.0`
+- `php-amqplib/php-amqplib 3.0`
+- `laravel/framework ^8.41`
 
 
 ### Laravel Installation
